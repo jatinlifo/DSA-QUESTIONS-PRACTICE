@@ -46,6 +46,7 @@ class Solution{
 
 int main () {
     int n;
+    
     cout<<"Enter the size of array : ";
     cin>>n;
     vector<int> nums(n);
