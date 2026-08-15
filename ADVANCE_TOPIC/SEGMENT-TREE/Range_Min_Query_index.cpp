@@ -20,9 +20,9 @@ void buildSegmentTree(int i, int l, int r, vector<int>& nums, vector<int>& segme
     int right_idx = segmentTree[2*i+2];
 
     if (nums[left_idx] >= nums[right_idx]) {
-        segmentTree[i] = left_idx;
-    } else {
         segmentTree[i] = right_idx;
+    } else {
+        segmentTree[i] = left_idx;
     }
 }
 
