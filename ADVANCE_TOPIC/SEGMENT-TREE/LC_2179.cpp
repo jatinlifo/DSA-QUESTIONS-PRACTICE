@@ -26,3 +26,85 @@
 // 3 <= n <= 105
 // 0 <= nums1[i], nums2[i] <= n - 1
 // nums1 and nums2 are permutations of [0, 1, ..., n - 1].
+
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+
+class Solution {
+public:
+    
+    void updateSegmentTree(int i, int l, int r, int idx, vector<long long>& segmentTree) {
+
+        if (l == r) {
+            segmentTree[i] = 1;
+            return;
+        }
+
+        int mid = l + (r - l) / 2;
+
+        if (idx <= mid) {
+            updateSegmentTree(2*i+1, l, mid, idx, segmentTree);
+        } else {
+            updateSegmentTree(2*i+2, mid+1, r, idx, segmentTree);
+        }
+
+        segmentTree[i] = segmentTree[2*i+1] + segmentTree[2*i+2];
+
+        return;
+    }
+
+    long long querySegmentTree(int st, int end, int i, int l, int r, vector<long long>& segmentTree) {
+
+        if (st > r || l > end) {
+            return 0;
+        }
+
+        if (l >= st && r <= end) {
+            return segmentTree[i];
+        }
+
+        int mid = l + (r - l) / 2;
+
+        long long left = querySegmentTree(st, end, 2*i+1, l, mid, segmentTree);
+        long long right = querySegmentTree(st, end, 2*i+2, mid+1, r, segmentTree);
+
+        return left + right;
+    }
+
+    long long goodTriplets(vector<int>& nums1, vector<int>& nums2) {
+        
+        long long ans = 0;
+        int n = nums1.size();
+
+        unordered_map<int, int> map;
+
+        for (int i = 0; i < n; i++) {
+            map[nums2[i]] = i;
+        }
+
+        vector<long long> segmentTree(4*n);
+        updateSegmentTree(0, 0, n-1, map[nums1[0]], segmentTree);
+
+        for (int i = 1; i < n; i++) {
+
+            int idx = map[nums1[i]];
+
+            long long leftCommonCount = querySegmentTree(0, idx, 0, 0, n-1, segmentTree);
+            long long leftNotCommonCount = i - leftCommonCount;
+            long long afterIdxNum2Count = (n - 1) - idx;
+            long long rightCommonCount = afterIdxNum2Count - leftNotCommonCount;
+
+            long long pairs = rightCommonCount * leftCommonCount;
+
+            ans += pairs;
+
+            updateSegmentTree(0, 0, n-1, idx, segmentTree);
+        }
+
+        return ans;
+    }
+};
