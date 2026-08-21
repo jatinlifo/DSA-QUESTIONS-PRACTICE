@@ -29,7 +29,7 @@ void rangeUpdateSegmentTree(int st, int end, int val, int i, int l, int r, vecto
             lazy[2*i+2] = lazy[i];
         }
 
-        lazy[i] = 0; // mena ya information aga provie kar dee tu mere holidy ho gaya ab
+        lazy[i] = 0; // mena ya information aga provide kar dee tu mere holidy ho gaya ab
     }
 
     // out of bound
