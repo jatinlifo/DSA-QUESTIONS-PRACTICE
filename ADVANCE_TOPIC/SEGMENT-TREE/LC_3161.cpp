@@ -42,3 +42,104 @@
 // 1 <= x, sz <= min(5 * 104, 3 * queries.length)
 // The input is generated such that for queries of type 1, no obstacle exists at distance x when the query is asked.
 // The input is generated such that there is at least one query of type
+
+
+#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+
+using namespace std;
+
+class Solution {
+public:
+    
+    void updateSegmentTree(int val, int idx, int i, int l, int r, vector<int>& segmentTree) {
+
+        if (l == r) {
+            segmentTree[i] = val;
+            return;
+        }
+
+        int mid = l + (r - l) / 2;
+
+        if (idx <= mid) {
+            updateSegmentTree(val, idx, 2*i+1, l, mid, segmentTree);
+        } else {
+            updateSegmentTree(val, idx, 2*i+2, mid+1, r, segmentTree);
+        }
+
+        segmentTree[i] = max(segmentTree[2*i+1], segmentTree[2*i+2]);
+
+        return;
+    }
+
+    int querySegmentTree(int st, int end, int i, int l, int r, vector<int>& segmentTree) {
+
+        if (l > end || st > r) {
+            return 0;
+        }
+
+        if (l >= st && r <= end) {
+            return segmentTree[i];
+        }
+
+        int mid = l + (r - l) / 2;
+        int left = querySegmentTree(st, end, 2*i+1, l, mid, segmentTree);
+        int right = querySegmentTree(st, end, 2*i+2, mid+1, r, segmentTree);
+
+        return max(left, right);
+    }
+    vector<bool> getResults(vector<vector<int>>& queries) {
+        
+        vector<bool> ans;
+        set<int> set;
+        set.insert(0);
+
+        int n = 50000;
+        vector<int> segmentTree(4*n);
+
+        for (auto& q : queries) {
+
+            if (q[0] == 1) {
+                int x = q[1];
+
+                auto it = set.upper_bound(x);
+                auto nxt = (it != set.end()) ? *it : -1;
+                int pre = *prev(it);
+
+                updateSegmentTree(x - pre, x, 0, 0, n-1, segmentTree);
+
+                if (nxt != -1) {
+                    updateSegmentTree(nxt - x, nxt, 0, 0, n-1, segmentTree);
+                }
+                set.insert(x);
+            } else {
+                int x = q[1];
+                int sz = q[2];
+                // int prev = 0;
+                // bool flag = false;
+
+                // for (auto& curr : set) {
+
+                //     if (curr > x) break;
+                //     if (curr - prev >= sz) {
+                //         flag = true;
+                //         break;
+                //     }
+                //     prev = curr;
+                // }
+
+                auto it = set.upper_bound(x);
+                int pre = *prev(it);
+
+                int maxGap = querySegmentTree(0, pre, 0, 0, n-1, segmentTree);
+                int best = max(maxGap, x - pre);
+
+                ans.push_back(best >= sz);
+            }
+        }
+
+        return ans;
+    }
+};
